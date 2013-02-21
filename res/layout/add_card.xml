@@ -2,7 +2,56 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="@drawable/background">
+    
+    <Button
+        android:id="@+id/scanButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_card_scan"
+        android:onClick="onScanPress" />
+
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:typeface="sans"
+        android:text="" />
+    
+    <TextView
+        android:id="@+id/aliasLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:typeface="sans"
+        android:text="@string/add_card_alias"/>   
+        
+    <EditText
+    	android:id="@+id/alias"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:text="" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_card_submit_button"
+        android:onClick="onSubmitPress" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        />
+    
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_card_back_button"
+        android:onClick="onBackPress" />
     
 
 </LinearLayout>

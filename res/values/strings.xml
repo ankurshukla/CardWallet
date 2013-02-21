@@ -3,5 +3,15 @@
 
     <string name="hello">Hello World, CardWalletActivity!</string>
     <string name="app_name">CardWallet</string>
+    
+    <!-- card-io token -->
+    <string name="MY_CARDIO_APP_TOKEN">c5c21f5e7c9848d284b99beda7baa381</string>
+    
+    <!-- add_card.xml -->
+    <string name="add_card_alias">Nickname</string>
+    <string name="add_card_scan">Scan a Credit Card</string>
+    <string name="add_card_submit_button">Submit</string>
+    <string name="add_card_back_button">Back</string>
+    <string name="act_add_card_enter_info">Enter Credit Card Information</string>
 
 </resources>
