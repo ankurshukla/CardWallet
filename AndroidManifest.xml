@@ -25,10 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <!-- card-io specific services -->
+       <!-- card-io specific services -->
         <activity android:name="io.card.payment.CardIOActivity" android:configChanges="keyboardHidden|orientation" />
         <activity android:name="io.card.payment.DataEntryActivity" android:screenOrientation="portrait" />
+        
+       <!-- services -->
+       <service android:name=".services.ScanIntentService"></service>
     </application>
 
 </manifest>

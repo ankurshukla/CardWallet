@@ -1,23 +1,30 @@
 package com.ankur.cardwallet.activity;
 
 import com.ankur.cardwallet.R;
+import com.ankur.cardwallet.datasource.Card;
+import com.ankur.cardwallet.datasource.CardDAO;
+import com.ankur.cardwallet.datasource.DBHelper;
+import com.ankur.cardwallet.services.ScanIntentService;
+import com.ankur.cardwallet.utilities.ActivitiesBridge;
 
 import io.card.payment.CardIOActivity;
+import io.card.payment.CreditCard;
 import android.app.Activity;
 import android.content.Intent;
 import android.opengl.Visibility;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Messenger;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AddCardActivity extends Activity {
-	
-	
-	
+
 	final String TAG = getClass().getName();
-	
+
 	private Button scanButton;
 	private TextView resultTextView;
 	private Button backButton;
@@ -25,73 +32,149 @@ public class AddCardActivity extends Activity {
 	private Button submitButton;
 	private TextView aliasLabel;
 	private Button back;
-	
+
 	private String cardIOToken;
-	
+	private Card card;
+	private CardDAO cardDAO = new CardDAO(this);
+
 	public static final int MY_SCAN_REQUEST_CODE = 100;
-	
+
+	private Handler handler = new Handler() {
+		public void handleMessage(android.os.Message message) {
+			
+			if (message.arg1 == RESULT_OK ) {
+				Toast.makeText(AddCardActivity.this, "card is added",
+						Toast.LENGTH_LONG);
+
+			} else {
+				Toast.makeText(AddCardActivity.this, "error adding the card",
+						Toast.LENGTH_LONG);
+			}
+		};
+	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.add_card);
-		
+
 		cardIOToken = getResources().getString(R.string.MY_CARDIO_APP_TOKEN);
-		
-		scanButton = (Button)findViewById(R.id.scanButton);
-		resultTextView = (TextView)findViewById(R.id.resultTextView);
-		
-		setAlias = (EditText)findViewById(R.id.alias);
-		aliasLabel = (TextView)findViewById(R.id.aliasLabel);
+
+		scanButton = (Button) findViewById(R.id.scanButton);
+		resultTextView = (TextView) findViewById(R.id.resultTextView);
+
+		setAlias = (EditText) findViewById(R.id.alias);
+		aliasLabel = (TextView) findViewById(R.id.aliasLabel);
 		setAlias.setVisibility(View.INVISIBLE);
 		aliasLabel.setVisibility(View.INVISIBLE);
-		
-		submitButton = (Button)findViewById(R.id.submitButton);
+
+		submitButton = (Button) findViewById(R.id.submitButton);
 		submitButton.setVisibility(View.INVISIBLE);
-		
-		backButton = (Button)findViewById(R.id.backButton);
-		
+
+		backButton = (Button) findViewById(R.id.backButton);
+
 	}
-	
-	public void onScanPress(View view){
-		
+
+	public void onScanPress(View view) {
+
 		Intent scanIntent = new Intent(this, CardIOActivity.class);
-		
+
 		// required for authentication with card.io
-    	scanIntent.putExtra(CardIOActivity.EXTRA_APP_TOKEN, cardIOToken );
-    	
-    	// customize these values to suit your needs.
-		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_EXPIRY, true); // default: true
-    	scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_CVV, true); // default: false
-    	scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_ZIP, true); // default: false
-    	scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, true); // default: false
-    	scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, true); // default: false
-    	
-    	startActivityForResult(scanIntent, MY_SCAN_REQUEST_CODE);
-		
+		scanIntent.putExtra(CardIOActivity.EXTRA_APP_TOKEN, cardIOToken);
+
+		// customize these values to suit your needs.
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_EXPIRY, false); 
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_CVV, false);
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_ZIP, false);
+		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, false);
+		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, false);
+
+		startActivityForResult(scanIntent, MY_SCAN_REQUEST_CODE);
+
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 
 		if (CardIOActivity.canReadCardWithCamera(this)) {
-			scanButton.setText(this.getResources().getString(R.string.add_card_scan));
-		}
-		else {
-			scanButton.setText(this.getResources().getString(R.string.act_add_card_enter_info));
+			scanButton.setText(this.getResources().getString(
+					R.string.add_card_scan));
+		} else {
+			scanButton.setText(this.getResources().getString(
+					R.string.act_add_card_enter_info));
 		}
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		if(requestCode == MY_SCAN_REQUEST_CODE && resultCode == CardIOActivity.RESULT_CARD_INFO){
-			//TODO: display stuff on scan completion
-			aliasLabel.setVisibility(View.VISIBLE);
-			submitButton.setVisibility(View.VISIBLE);
-			scanButton.setVisibility(View.INVISIBLE);
+		String resultStr;
+		if (requestCode == MY_SCAN_REQUEST_CODE
+				&& resultCode == CardIOActivity.RESULT_CARD_INFO) {
+
+			if (data != null && data.hasExtra(CardIOActivity.EXTRA_SCAN_RESULT)) {
+				CreditCard scanResult = data
+						.getParcelableExtra(CardIOActivity.EXTRA_SCAN_RESULT);
+
+				card = new Card();
+				if (cardDAO.valueExists(DBHelper.COLUMN_CARDNUM,
+						scanResult.getFormattedCardNumber())) {
+					card.setCardNumber(scanResult.getFormattedCardNumber());
+					resultStr = "Card Number: " + card.getCardNumber();
+
+					if (scanResult.isExpiryValid()) {
+						resultStr += "Expiration Date: "
+								+ scanResult.expiryMonth + "/"
+								+ scanResult.expiryYear + "\n";
+						card.setExpiryDate(scanResult.expiryMonth + "/"
+								+ scanResult.expiryYear);
+					}
+
+					if (scanResult.cvv != null) {
+						// Never log or display a CVV
+						resultStr += "CVV has " + scanResult.cvv.length()
+								+ " digits.\n";
+						card.setCvv(scanResult.cvv);
+					}
+
+					if (scanResult.zip != null) {
+						resultStr += "Zip: " + scanResult.zip + "\n";
+						card.setBillingZip(scanResult.zip);
+					}
+
+					aliasLabel.setVisibility(View.VISIBLE);
+					submitButton.setVisibility(View.VISIBLE);
+					scanButton.setVisibility(View.INVISIBLE);
+
+				} else {
+					resultStr = "Credit Card Already Exists in System";
+				}
+
+			} else {
+				resultStr = "Scan was canceled.";
+			}
+			resultTextView.setText(resultStr);
+			card.setCardHolderName("ANKUR SHUKLA");
+		}
+	}
+	
+	public void onSubmitPress(View view){
+		if(card != null){
+			
+			String alias = setAlias.getText().toString();
+			card.setAlias(alias);
+			
+			Intent intent = new Intent(AddCardActivity.this, ScanIntentService.class);
+			Messenger messenger = new Messenger(handler);
+			intent.putExtra("MESSENGER", messenger);
+			
+			ActivitiesBridge.setObject(card);
+			
+			startService(intent);
+		}else {
+			Toast.makeText(this, "Error Occured", Toast.LENGTH_LONG);
 		}
 	}
 

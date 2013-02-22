@@ -13,5 +13,9 @@
     <string name="add_card_submit_button">Submit</string>
     <string name="add_card_back_button">Back</string>
     <string name="act_add_card_enter_info">Enter Credit Card Information</string>
+    
+    <!-- view cards -->
+    <string name="view_cards_no_card">No Card(s) in the Wallet</string>
+    <string name="view_cards_back_button">Back</string>
 
 </resources>
