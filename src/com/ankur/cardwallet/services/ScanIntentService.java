@@ -3,6 +3,7 @@ package com.ankur.cardwallet.services;
 import com.ankur.cardwallet.datasource.Card;
 import com.ankur.cardwallet.datasource.CardDAO;
 import com.ankur.cardwallet.utilities.ActivitiesBridge;
+import com.ankur.cardwallet.utilities.IntentHelper;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -25,7 +26,7 @@ public class ScanIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		card = (Card)ActivitiesBridge.getObject();
+		card = (Card)IntentHelper.getObjectForKey("card");
 		if(card != null){
 			cardDAO.open();
 			cardDAO.createCard(card);

@@ -1,17 +1,9 @@
 package com.ankur.cardwallet.activity;
 
-import com.ankur.cardwallet.R;
-import com.ankur.cardwallet.datasource.Card;
-import com.ankur.cardwallet.datasource.CardDAO;
-import com.ankur.cardwallet.datasource.DBHelper;
-import com.ankur.cardwallet.services.ScanIntentService;
-import com.ankur.cardwallet.utilities.ActivitiesBridge;
-
 import io.card.payment.CardIOActivity;
 import io.card.payment.CreditCard;
 import android.app.Activity;
 import android.content.Intent;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Messenger;
@@ -20,6 +12,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.ankur.cardwallet.R;
+import com.ankur.cardwallet.datasource.Card;
+import com.ankur.cardwallet.datasource.CardDAO;
+import com.ankur.cardwallet.datasource.DBHelper;
+import com.ankur.cardwallet.services.ScanIntentService;
+import com.ankur.cardwallet.utilities.IntentHelper;
 
 public class AddCardActivity extends Activity {
 
@@ -170,7 +169,7 @@ public class AddCardActivity extends Activity {
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);
 			
-			ActivitiesBridge.setObject(card);
+			IntentHelper.addObjectForKey(card, "card");
 			
 			startService(intent);
 		}else {
