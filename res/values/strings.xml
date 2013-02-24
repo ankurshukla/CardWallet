@@ -7,15 +7,27 @@
     <!-- card-io token -->
     <string name="MY_CARDIO_APP_TOKEN">c5c21f5e7c9848d284b99beda7baa381</string>
     
+    <!-- card_wallet.xml -->
+    <string name="card_wallet_add_card_button">Add Card</string>
+    <string name="card_wallet_view_cards_button">View Cards</string>
+    
     <!-- add_card.xml -->
     <string name="add_card_alias">Nickname</string>
     <string name="add_card_scan">Scan a Credit Card</string>
     <string name="add_card_submit_button">Submit</string>
-    <string name="add_card_back_button">Back</string>
-    <string name="act_add_card_enter_info">Enter Credit Card Information</string>
+    <string name="add_card_back_button">Back to Main Menu</string>
+    
     
     <!-- view cards -->
     <string name="view_cards_no_card">No Card(s) in the Wallet</string>
-    <string name="view_cards_back_button">Back</string>
+    <string name="view_cards_back_button">Back to Main Menu</string>
+    
+    <!-- Activity -->
+    <string name="act_add_card_enter_info">Enter Credit Card Information</string>
+    <string name="act_add_card_scan">Scan a Credit card</string>
+    <string name="act_add_card_card_exits_error">The Credit Card already Exists in the System </string>
+    <string name="act_add_card_scan_cancelled">The Scan was Cancelled</string>
+    <string name="act_add_card_toast_error">Error Occured</string>
+    <string name="act_add_card_success">Card added Successfully</string>
 
 </resources>

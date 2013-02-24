@@ -17,35 +17,14 @@ import android.util.Log;
 public class ScanIntentService extends IntentService {
 	
 	private int RESULT = Activity.RESULT_CANCELED;
-	private static Card card;
-	private  CardDAO cardDAO = new CardDAO(this);
-
+	
 	public ScanIntentService(String name) {
 		super("ScanIntentService");
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		card = (Card)IntentHelper.getObjectForKey("card");
-		if(card != null){
-			cardDAO.open();
-			cardDAO.createCard(card);
-			cardDAO.close();
-			
-			RESULT = Activity.RESULT_OK;
-		}
 		
-		Bundle extras = intent.getExtras();
-		if(extras != null){
-			Messenger messenger = (Messenger) extras.get("MESSENGER");
-		    Message msg = Message.obtain();
-		    msg.arg1 = RESULT;
-		    try{
-		    	messenger.send(msg);
-		    }catch (RemoteException re) {
-		    	Log.w(getClass().getName(), "Exception sending message");
-			}
-		}
 	}
 
 }

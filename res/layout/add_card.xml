@@ -2,22 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
-    android:background="@drawable/background">
+    android:orientation="vertical">
     
     <Button
         android:id="@+id/scanButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/add_card_scan"
-        android:textColor="@color/black"
         android:onClick="onScanPress" />
 
     <TextView
         android:id="@+id/resultTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
         android:typeface="sans"
         android:text="" />
     
@@ -25,7 +22,6 @@
         android:id="@+id/aliasLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
         android:typeface="sans"
         android:text="@string/add_card_alias"/>   
         

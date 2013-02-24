@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Messenger;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -38,19 +39,6 @@ public class AddCardActivity extends Activity {
 
 	public static final int MY_SCAN_REQUEST_CODE = 100;
 
-	private Handler handler = new Handler() {
-		public void handleMessage(android.os.Message message) {
-			
-			if (message.arg1 == RESULT_OK ) {
-				Toast.makeText(AddCardActivity.this, "card is added",
-						Toast.LENGTH_LONG);
-
-			} else {
-				Toast.makeText(AddCardActivity.this, "error adding the card",
-						Toast.LENGTH_LONG);
-			}
-		};
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,11 +71,11 @@ public class AddCardActivity extends Activity {
 		scanIntent.putExtra(CardIOActivity.EXTRA_APP_TOKEN, cardIOToken);
 
 		// customize these values to suit your needs.
-		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_EXPIRY, false); 
-		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_CVV, false);
-		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_ZIP, false);
-		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, false);
-		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, false);
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_EXPIRY, true); 
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_CVV, true);
+		scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_ZIP, true);
+		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, true);
+		scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, true);
 
 		startActivityForResult(scanIntent, MY_SCAN_REQUEST_CODE);
 
@@ -99,7 +87,7 @@ public class AddCardActivity extends Activity {
 
 		if (CardIOActivity.canReadCardWithCamera(this)) {
 			scanButton.setText(this.getResources().getString(
-					R.string.add_card_scan));
+					R.string.act_add_card_scan));
 		} else {
 			scanButton.setText(this.getResources().getString(
 					R.string.act_add_card_enter_info));
@@ -118,13 +106,13 @@ public class AddCardActivity extends Activity {
 						.getParcelableExtra(CardIOActivity.EXTRA_SCAN_RESULT);
 
 				card = new Card();
-				if (cardDAO.valueExists(DBHelper.COLUMN_CARDNUM,
+				if (!cardDAO.valueExists(DBHelper.COLUMN_CARDNUM,
 						scanResult.getFormattedCardNumber())) {
 					card.setCardNumber(scanResult.getFormattedCardNumber());
-					resultStr = "Card Number: " + card.getCardNumber();
+					resultStr = " Card Number: " + card.getCardNumber()+"\n";
 
 					if (scanResult.isExpiryValid()) {
-						resultStr += "Expiration Date: "
+						resultStr += " Expiration Date: "
 								+ scanResult.expiryMonth + "/"
 								+ scanResult.expiryYear + "\n";
 						card.setExpiryDate(scanResult.expiryMonth + "/"
@@ -133,7 +121,7 @@ public class AddCardActivity extends Activity {
 
 					if (scanResult.cvv != null) {
 						// Never log or display a CVV
-						resultStr += "CVV has " + scanResult.cvv.length()
+						resultStr += " CVV has " + scanResult.cvv.length()
 								+ " digits.\n";
 						card.setCvv(scanResult.cvv);
 					}
@@ -144,15 +132,18 @@ public class AddCardActivity extends Activity {
 					}
 
 					aliasLabel.setVisibility(View.VISIBLE);
+					setAlias.setVisibility(View.VISIBLE);
 					submitButton.setVisibility(View.VISIBLE);
 					scanButton.setVisibility(View.INVISIBLE);
 
 				} else {
-					resultStr = "Credit Card Already Exists in System";
+					resultStr = this.getResources().getString(
+							R.string.act_add_card_card_exits_error);
 				}
 
 			} else {
-				resultStr = "Scan was canceled.";
+				resultStr = this.getResources().getString(
+						R.string.act_add_card_scan_cancelled);
 			}
 			resultTextView.setText(resultStr);
 			card.setCardHolderName("ANKUR SHUKLA");
@@ -160,21 +151,30 @@ public class AddCardActivity extends Activity {
 	}
 	
 	public void onSubmitPress(View view){
+		
+		InputMethodManager imm = (InputMethodManager)getSystemService(this.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(setAlias.getWindowToken(), 0);
+		aliasLabel.setVisibility(View.INVISIBLE);
+		setAlias.setVisibility(View.INVISIBLE);
+		submitButton.setVisibility(View.INVISIBLE);
+		
 		if(card != null){
 			
 			String alias = setAlias.getText().toString();
 			card.setAlias(alias);
-			
-			Intent intent = new Intent(AddCardActivity.this, ScanIntentService.class);
-			Messenger messenger = new Messenger(handler);
-			intent.putExtra("MESSENGER", messenger);
-			
-			IntentHelper.addObjectForKey(card, "card");
-			
-			startService(intent);
+			cardDAO.open();
+			cardDAO.createCard(card);
+			cardDAO.close();
+				
+			resultTextView.setText(this.getResources().getString(R.string.act_add_card_success));
 		}else {
-			Toast.makeText(this, "Error Occured", Toast.LENGTH_LONG);
+			resultTextView.setText(this.getResources().getString(R.string.act_add_card_toast_error));
 		}
+	}
+	
+	public void onBackPress(View view){
+		Intent intent = new Intent(this, CardWalletActivity.class);
+		startActivity(intent);
 	}
 
 }
